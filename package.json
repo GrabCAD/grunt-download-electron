@@ -1,7 +1,7 @@
 {
   "name": "grunt-download-electron",
   "description": "Grunt task to download electron",
-  "version": "2.1.1",
+  "version": "2.1.1-eagle.1",
   "main": "grunt.js",
   "dependencies": {
     "decompress-zip": "0.0.4",
@@ -19,7 +19,7 @@
   "homepage": "https://github.com/atom/grunt-download-electron",
   "repository": {
     "type": "git",
-    "url": "https://github.com/atom/grunt-download-electron.git"
+    "url": "git@github.com:GrabCAD/grunt-download-electron.git"
   },
   "bugs": {
     "url": "https://github.com/atom/grunt-download-electron/issues"
