@@ -2,6 +2,10 @@
   "name": "grunt-download-electron",
   "description": "Grunt task to download electron",
   "version": "2.1.1-eagle.2",
+  "author": "GrabCAD",
+  "publishConfig": {
+    "registry": "https://artifactory4.grabcad.net/artifactory/api/npm/npm-local/"
+  },  
   "main": "grunt.js",
   "dependencies": {
     "decompress-zip": "0.0.4",
