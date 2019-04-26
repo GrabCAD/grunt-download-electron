@@ -132,6 +132,15 @@ module.exports = (grunt) ->
     currentAtomShellVersion = getAtomShellVersion(outputDir)
     return done() if currentAtomShellVersion is version
 
+    # If we already have a zipfile in our local Cache copy that to the
+    # versionDownloadDir
+    localCache = path.join(__dirname, "..", "cache");
+    if process.platform == "win32"
+      projectName = "electron-#{version}-#{process.platform}-#{getArch()}.zip"
+      zipFilePath =path.join(localCache, projectName)
+      if fs.existsSync(zipFilePath)
+        copyDirectory(localCache, downloadDir)
+
     # Install a cached download of electron if one is available.
     if getAtomShellVersion(versionDownloadDir)?
       grunt.verbose.writeln("Installing cached electron #{version}.")
