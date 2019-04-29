@@ -48,8 +48,14 @@ module.exports = (grunt) ->
       excludeHiddenUnix: false
       inflateSymlinks: false
 
+  copyFile = (fromPath, toPath) =>
+    contents = fs.readFileSync(fromPath)
+    fs.writeFileSync(toPath, contents)
+    stat =  fs.lstatSync(fromPath)
+    fs.chmodSync(toPath, stat.mode)
+
   unzipFile = (zipPath, callback) ->
-    grunt.verbose.writeln "Unzipping #{path.basename(zipPath)}."
+    grunt.log.writeln "Unzipping #{zipPath}."
     directoryPath = path.dirname zipPath
 
     if process.platform is 'darwin'
@@ -65,6 +71,7 @@ module.exports = (grunt) ->
       unzipper.on 'extract', ->
         fs.closeSync unzipper.fd
         fs.unlinkSync zipPath
+        grunt.verbose.writeln "unzipped"
 
         # Make sure atom/electron is executable on Linux
         if process.platform is 'linux'
@@ -134,10 +141,31 @@ module.exports = (grunt) ->
 
     # Install a cached download of electron if one is available.
     if getAtomShellVersion(versionDownloadDir)?
-      grunt.verbose.writeln("Installing cached electron #{version}.")
+      grunt.log.writeln("Installing cached electron #{version}.")
       copyDirectory(versionDownloadDir, outputDir)
       rebuildNativeModules apm, currentAtomShellVersion, version, rebuild, done, appDir
       return
+
+    # If we already have a zipfile in our local Cache copy that to the
+    # versionDownloadDir
+    localCache = path.join(__dirname, "..", "cache");
+    if process.platform == "win32"
+      zipFile = "electron-#{version}-#{process.platform}-#{getArch()}.zip"
+      zipFilePath = path.join(localCache, zipFile)
+      if fs.existsSync(zipFilePath)
+        copyDirectory(localCache, downloadDir)
+        if !fs.existsSync(versionDownloadDir)
+          fs.mkdirSync(versionDownloadDir)
+        copyFile(path.join(downloadDir, zipFile), path.join(versionDownloadDir, "electron.zip"))
+        unzipFile path.join(versionDownloadDir, "electron.zip"), (error) ->
+          if error
+            grunt.log.error "Unable to unzip #{zipFile}", error
+            return done false
+          grunt.verbose.writeln "Installing electron #{version}."
+          copyDirectory(versionDownloadDir, outputDir)
+          rebuildNativeModules apm, currentAtomShellVersion, version, rebuild, done, appDir
+          return done true
+        return
 
     # Request the assets.
     github = new GitHub({repo: 'atom/electron', token})
